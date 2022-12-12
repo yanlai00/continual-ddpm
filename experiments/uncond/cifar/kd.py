@@ -20,7 +20,7 @@ def main(args):
     trainer = DistillationTrainer()
     trainer.image_channels = 3
     trainer.batch_size = 64
-    trainer.epochs = 200
+    trainer.epochs = 500
     trainer.n_samples = 64
     trainer.datasets = [SplitCIFAR10(trainer.image_size, target=t) for t in range(10)]
     trainer.wandb = args.wandb

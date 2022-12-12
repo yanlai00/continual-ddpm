@@ -15,7 +15,7 @@ from ewc import EWC
 import torch.nn.functional as F
 
 def get_exp_path(name=''):
-    exp_path = os.environ.get('EXP') or os.path.join('/home/yy2694/ddpm/', 'checkpoints')
+    exp_path = os.environ.get('EXP') or os.path.join('/home/yy2694/continual-ddpm/', 'checkpoints')
     exp_path = os.path.join(exp_path, datetime.now().strftime("%m%d%Y_%H%M%S") + name)
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
@@ -170,7 +170,7 @@ class Gaussian2DTrainer(Trainer):
             # Train the model
             self.train()
             # Sample some images
-            self.sample()
+            self.sample(self.n_samples)
             if (epoch+1) % 20 == 0:
                 # Save the eps model
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch}.pt'))
@@ -255,7 +255,7 @@ class ContinualGaussian2DTrainer(Gaussian2DTrainer):
                 # Train the model
                 self.train()
                 # Sample some images
-                self.sample()
+                self.sample(self.n_samples)
                 # Save the eps model
                 if (epoch+1) % 20 == 0:
                     # Save the eps model

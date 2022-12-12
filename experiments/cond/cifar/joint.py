@@ -19,7 +19,7 @@ def main(args):
 
     trainer = ClassConditionedTrainer()
     trainer.batch_size = 64
-    trainer.epochs = 1000
+    trainer.epochs = 675
     trainer.image_channels = 3
     trainer.n_samples = 32
     trainer.num_classes = 10
@@ -29,6 +29,7 @@ def main(args):
 
     # Initialize, start and run the training loop
     trainer.init()
+    trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12112022_135829/checkpoint_325.pt'))
     trainer.run()
 
 if __name__ == '__main__':

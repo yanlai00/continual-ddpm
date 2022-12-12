@@ -92,13 +92,13 @@ class ClassConditionedTrainer(Trainer):
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 5 == 0:
+            if epoch == 0 or (epoch + 1) % 25 == 0:
                 # Sample some images
                 for class_idx in range(self.num_classes):
                     self.sample(class_idx, self.n_samples)
                     print(f"Finish Generating Class {class_idx}")
             # Train the model
             self.train()
-            if (epoch+1) % 5 == 0:
+            if (epoch+1) % 25 == 0:
                 # Save the eps model
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))

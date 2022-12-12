@@ -24,7 +24,7 @@ def main(args):
     trainer.epochs = 100
     trainer.image_channels = 1
     trainer.n_samples = 64
-    trainer.dataset = SplitMNIST(trainer.image_size, target=2)
+    trainer.dataset = SplitMNIST(trainer.image_size, target=5)
     trainer.wandb = args.wandb
     trainer.wandb_name = args.wandb_name
 

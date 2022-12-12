@@ -34,7 +34,7 @@ class DistillationTrainer(ContinualTrainer):
             loss = self.diffusion.loss(data)
             if self.diffusion.has_copy:
                 distillation_loss = self.diffusion.distillation_loss()
-                total_loss = loss + 10 * distillation_loss
+                total_loss = loss + 5 * distillation_loss
             else:
                 total_loss = loss
             # Compute gradients
@@ -65,14 +65,14 @@ class DistillationTrainer(ContinualTrainer):
             
             for epoch in range(epochs):
                 # Sample some images
-                if epoch == 0 or (epoch+1) % 10 == 0:
-                    self.sample()
+                if epoch == 0 or (epoch+1) % 20 == 0:
+                    self.sample(self.n_samples)
                 # Train the model
                 self.train()
                 # Save the eps model
-                if (epoch+1) % 10 == 0:
+                if (epoch+1) % 20 == 0:
                     # Save the eps model
-                    cumulative_epoch = experience_id * self.epochs + epoch
+                    cumulative_epoch = experience_id * self.epochs + (epoch+1)
                     torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{cumulative_epoch}.pt'))
             
             print(f"Finished Experience {experience_id}")

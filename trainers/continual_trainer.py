@@ -37,7 +37,7 @@ class ContinualTrainer(Trainer):
             for epoch in range(epochs):
                 # Sample some images
                 if epoch == 0 or (epoch+1) % 10 == 0:
-                    self.sample()
+                    self.sample(self.n_samples)
                 # Train the model
                 self.train()
                 # Save the eps model
