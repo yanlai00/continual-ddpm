@@ -15,7 +15,7 @@ from trainers.trainer import Trainer, Gaussian2DTrainer, ClassConditionedGaussia
 from trainers.continual_trainer import ContinualTrainer
 from trainers.continual_conditional_trainer import ContinualConditionalTrainer
 
-class ReplayTrainer(ContinualTrainer):
+class ConditionalReplayTrainer(ContinualConditionalTrainer):
 
     n_replay_samples: int = 50
 
@@ -32,16 +32,15 @@ class ReplayTrainer(ContinualTrainer):
                 replay_dataset = torch.utils.data.Subset(self.datasets[prev_task], list(range(self.n_replay_samples)))
                 self.prev_datasets.append(replay_dataset)
                 curr_dataset = self.datasets[experience_id]
-                multipler = max(len(curr_dataset) // len(replay_dataset), 1)
-                self.dataset = torch.utils.data.ConcatDataset([*(self.prev_datasets * multipler), curr_dataset])
+                self.dataset = torch.utils.data.ConcatDataset([*(self.prev_datasets), curr_dataset])
             self.data_loader = torch.utils.data.DataLoader(self.dataset, self.batch_size, shuffle=True, pin_memory=True)
 
-            epochs = self.epochs // (experience_id + 1)
-
-            for epoch in range(epochs):
+            for epoch in range(self.epochs):
                 # Sample some images
                 if epoch == 0 or (epoch+1) % 20 == 0:
-                    self.sample(self.n_samples)
+                    for class_idx in range(self.num_classes):
+                        self.sample(class_idx, self.n_samples)
+                        print(f"Finish Generating Class {class_idx}")
                 # Train the model
                 self.train()
                 # Save the eps model
@@ -51,5 +50,7 @@ class ReplayTrainer(ContinualTrainer):
                     torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{cumulative_epoch}.pt'))
             
             print(f"Finished Experience {experience_id}")
+
+
 
 
