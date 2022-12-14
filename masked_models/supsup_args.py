@@ -2,7 +2,7 @@ import argparse
 
 args = argparse.Namespace()
 args.width_mult = 1.0
-args.num_tasks = 2
+args.num_tasks = 10
 args.sparsity = 0.5
 args.mode = "fan_in"
 args.nonlinearity = 'relu'

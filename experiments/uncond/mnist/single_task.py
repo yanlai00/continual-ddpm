@@ -24,7 +24,7 @@ def main(args):
     trainer.epochs = 100
     trainer.image_channels = 1
     trainer.n_samples = 64
-    trainer.dataset = SplitMNIST(trainer.image_size, target=5)
+    trainer.dataset = SplitMNIST(trainer.image_size, target=args.target)
     trainer.wandb = args.wandb
     trainer.wandb_name = args.wandb_name
 
@@ -36,6 +36,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Denoise Diffusion Probabilitic Models')
     parser.add_argument('--wandb', action='store_true', help='whether to use wandb')
     parser.add_argument('--wandb_name', type=str, help='wandb run name')
+    parser.add_argument('--target', type=int, help='class number')
     args = parser.parse_args()
     main(args)
 

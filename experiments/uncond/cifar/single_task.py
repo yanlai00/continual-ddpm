@@ -21,22 +21,22 @@ def main(args):
     # Override config defaults
     # TODO add a more general method for this
     trainer.batch_size = 128
-    trainer.epochs = 500 # 100
+    trainer.epochs = 1000
     trainer.image_channels = 3 # 1
     trainer.n_samples = 64
-    trainer.dataset = SplitCIFAR10(trainer.image_size, target=1)
+    trainer.dataset = SplitCIFAR10(trainer.image_size, target=args.target)
     trainer.wandb = args.wandb
     trainer.wandb_name = args.wandb_name
 
     # Initialize, start and run the training loop
     trainer.init()
-    trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12122022_110430cifar_1/checkpoint_500.pt'))
     trainer.run()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Denoise Diffusion Probabilitic Models')
     parser.add_argument('--wandb', action='store_true', help='whether to use wandb')
     parser.add_argument('--wandb_name', type=str, help='wandb run name')
+    parser.add_argument('--target', type=int, help='class number')
     args = parser.parse_args()
     main(args)
 

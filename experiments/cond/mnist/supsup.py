@@ -19,17 +19,15 @@ def main(args):
 
     trainer = SupSupTrainer()
     trainer.batch_size = 128
-    trainer.epochs = 100
+    trainer.epochs = 60
     trainer.image_channels = 1
     trainer.n_samples = 16
-    trainer.num_classes = 2
-    trainer.datasets = [SplitMNIST(trainer.image_size, target=0), SplitMNIST(trainer.image_size, target=1)]
+    trainer.num_classes = 10
+    trainer.datasets = [SplitMNIST(trainer.image_size, target=t) for t in range(10)]
     trainer.wandb = args.wandb
 
     # Initialize, start and run the training loop
-    trainer.init()
-    trainer.eps_model.load_state_dict(torch.load('/home/yy2694/ddpm/experiments/12092022_122929/checkpoint_39.pt'))
-    
+    trainer.init()    
     trainer.run()
 
 if __name__ == '__main__':
