@@ -13,17 +13,6 @@ from tqdm import tqdm
 
 from metrics.inception import InceptionV3
 
-parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-parser.add_argument('--batch-size', type=int, default=50,
-                    help='Batch size to use')
-parser.add_argument('--dims', type=int, default=2048,
-                    choices=list(InceptionV3.BLOCK_INDEX_BY_DIM),
-                    help=('Dimensionality of Inception features to use. '
-                          'By default, uses pool3 features'))
-parser.add_argument('path', type=str, nargs=2,
-                    help=('Paths to the generated images or '
-                          'to .npz statistic files'))
-
 IMAGE_EXTENSIONS = {'bmp', 'jpg', 'jpeg', 'pgm', 'png', 'ppm',
                     'tif', 'tiff', 'webp'}
 
@@ -44,11 +33,11 @@ class ImagePathDataset(torch.utils.data.Dataset):
         return img
 
 
-def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
+def get_activations(dataset, model, batch_size=100, dims=2048, device='cpu',
                     num_workers=1):
     """Calculates the activations of the pool_3 layer for all images.
     Params:
-    -- files       : List of image files paths
+    -- dataset     : image dataset
     -- model       : Instance of inception model
     -- batch_size  : Batch size of images for the model to process at once.
                      Make sure that the number of samples is a multiple of
@@ -65,19 +54,21 @@ def get_activations(files, model, batch_size=50, dims=2048, device='cpu',
     """
     model.eval()
 
-    if batch_size > len(files):
-        print(('Warning: batch size is bigger than the data size. '
-               'Setting batch size to data size'))
-        batch_size = len(files)
+    if batch_size > len(dataset):
+        raise ValueError('batch size is bigger than the data size')
 
-    dataset = ImagePathDataset(files, transforms=transforms.ToTensor())
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=num_workers)
 
-    pred_arr = np.empty((len(files), dims))
+    pred_arr = np.empty((len(dataset), dims))
 
     start_idx = 0
 
     for batch in tqdm(dataloader):
+        if isinstance(batch, list):
+            batch = batch[0]
+        if batch.shape[1] == 1:
+            batch = batch.repeat((1, 3, 1, 1))
+        assert batch.shape[1] == 3
         batch = batch.to(device)
 
         with torch.no_grad():
@@ -151,11 +142,11 @@ def calculate_frechet_distance(mu1, sigma1, mu2, sigma2, eps=1e-6):
             + np.trace(sigma2) - 2 * tr_covmean)
 
 
-def calculate_activation_statistics(files, model, batch_size=50, dims=2048,
+def calculate_activation_statistics(dataset, model, batch_size=50, dims=2048,
                                     device='cpu', num_workers=1):
     """Calculation of the statistics used by the FID.
     Params:
-    -- files       : List of image files paths
+    -- files       : image dataset
     -- model       : Instance of inception model
     -- batch_size  : The images numpy array is split into batches with
                      batch size batch_size. A reasonable batch size
@@ -169,47 +160,7 @@ def calculate_activation_statistics(files, model, batch_size=50, dims=2048,
     -- sigma : The covariance matrix of the activations of the pool_3 layer of
                the inception model.
     """
-    act = get_activations(files, model, batch_size, dims, device, num_workers)
+    act = get_activations(dataset, model, batch_size, dims, device, num_workers)
     mu = np.mean(act, axis=0)
     sigma = np.cov(act, rowvar=False)
     return mu, sigma
-
-
-def compute_statistics_of_path(path, model, batch_size, dims, device,
-                               num_workers=1):
-    if path.endswith('.npz'):
-        with np.load(path) as f:
-            m, s = f['mu'][:], f['sigma'][:]
-    else:
-        path = pathlib.Path(path)
-        files = sorted([file for ext in IMAGE_EXTENSIONS
-                       for file in path.glob('*.{}'.format(ext))])
-        m, s = calculate_activation_statistics(files, model, batch_size,
-                                               dims, device, num_workers)
-
-    return m, s
-
-
-def calculate_fid_given_paths(paths, batch_size, device, dims, num_workers=1):
-    """Calculates the FID of two paths"""
-    assert len(paths) == 2
-    for p in paths:
-        if not os.path.exists(p):
-            raise RuntimeError('Invalid path: %s' % p)
-
-    block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[dims]
-    model = InceptionV3([block_idx]).to(device)
-
-    m1, s1 = compute_statistics_of_path(paths[0], model, batch_size, dims, device, num_workers)
-    m2, s2 = compute_statistics_of_path(paths[1], model, batch_size, dims, device, num_workers)
-    fid_value = calculate_frechet_distance(m1, s1, m2, s2)
-
-    return fid_value
-
-
-if __name__ == '__main__':
-    args = parser.parse_args()
-    device = torch.device('cuda')
-    num_workers = 8
-    fid_value = calculate_fid_given_paths(args.path, args.batch_size, device, args.dims, num_workers)
-    print('FID: ', fid_value)

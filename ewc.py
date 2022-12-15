@@ -26,8 +26,6 @@ class EWC():
         self.eps_model.eval()
         
         for (data, label) in data_loader:
-            data = data.unsqueeze(0)
-            label = label.unsqueeze(0)
             data, label = data.to('cuda'), label.to('cuda')
             self.eps_model.zero_grad()
             # loss = self.diffusion.loss(data, label)
@@ -35,7 +33,7 @@ class EWC():
             loss.backward()
 
             for n, p in self.eps_model.named_parameters():
-                if p.requires_grad:
+                if p.requires_grad and p.grad is not None:
                     precision_matrices[n].data += p.grad.data ** 2 / len_dataloader
        
         precision_matrices = {n: p for n, p in precision_matrices.items()}
