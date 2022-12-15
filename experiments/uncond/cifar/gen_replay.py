@@ -28,6 +28,7 @@ def main(args):
 
     # Initialize, start and run the training loop
     trainer.init()
+    trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12132022_212615cifar_uncond_replay/checkpoint_600.pt'))
     trainer.run()
 
 if __name__ == '__main__':

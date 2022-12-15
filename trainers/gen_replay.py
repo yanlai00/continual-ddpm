@@ -55,7 +55,7 @@ class GenerativeReplayTrainer(ContinualTrainer):
         """
         for experience_id in range(self.n_experiences):
             self.dataset = self.datasets[experience_id]
-            batch_size = self.batch_size // (self.n_experiences + 1)
+            batch_size = self.batch_size // (experience_id + 1)
             self.data_loader = torch.utils.data.DataLoader(self.dataset, batch_size, shuffle=True, pin_memory=True)
             if experience_id > 0:
                 self.diffusion.save_model_copy()

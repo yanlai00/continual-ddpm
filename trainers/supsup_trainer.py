@@ -50,7 +50,7 @@ class SupSupTrainer(ContinualConditionalTrainer):
                 # Sample some images
                 if (epoch+1) % 10 == 0:
                     # Sample some images
-                    for class_idx in range(min(self.n_experiences + 1, self.num_classes)):
+                    for class_idx in range(min(experience_id + 1, self.num_classes)):
                         self.eps_model.apply(lambda m: setattr(m, "task", class_idx))
                         self.sample(class_idx, self.n_samples)
                         print(f"Finish Generating Class {class_idx}")
