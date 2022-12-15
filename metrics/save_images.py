@@ -5,7 +5,7 @@ import argparse
 from torchvision.utils import save_image
 import os
 
-save_dir = '/home/yy2694/continual-ddpm/images/mnist_uncond_joint/'
+save_dir = '/home/yy2694/continual-ddpm/images/mnist_uncond_sft/'
 os.mkdir(save_dir)
 
 trainer = Trainer()
@@ -16,9 +16,10 @@ trainer.n_samples = 128
 trainer.dataset = MNIST(trainer.image_size)
 
 trainer.init()
-trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12022022_144833/checkpoint_99.pt'))
+# trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12022022_144833/checkpoint_99.pt'))
+trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12112022_142143mnist_uncond_sft/checkpoint_399.pt'))
 
-num_iterations = 10000 // trainer.batch_size
+num_iterations = 1
 
 step = 0
 for i in range(num_iterations):

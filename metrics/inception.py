@@ -4,7 +4,8 @@ import torch.nn.functional as F
 import torchvision
 from torch.utils.model_zoo import load_url as load_state_dict_from_url
 
-FID_WEIGHTS_URL = 'https://github.com/mseitzer/pytorch-fid/releases/download/fid_weights/pt_inception-2015-12-05-6726825d.pth'  # noqa: E501
+# FID_WEIGHTS_URL = 'https://github.com/mseitzer/pytorch-fid/releases/download/fid_weights/pt_inception-2015-12-05-6726825d.pth'  # noqa: E501
+FID_WEIGHTS_URL = '/home/yy2694/continual-ddpm/classifiers/canonical_mnist_9.pth'
 
 class InceptionV3(nn.Module):
     """Pretrained InceptionV3 network returning feature maps"""
@@ -160,10 +161,8 @@ def fid_inception_v3():
     This method first constructs torchvision's Inception and then patches the
     necessary parts that are different in the FID Inception model.
     """
-    inception = torchvision.models.inception_v3(num_classes=1008,
-                              aux_logits=False,
-                              pretrained=False,
-                              init_weights=False)
+    # inception = torchvision.models.inception_v3(num_classes=1008, aux_logits=False, pretrained=False, init_weights=False)
+    inception = torchvision.models.inception_v3(num_classes=10, aux_logits=False, pretrained=False, init_weights=False)
     inception.Mixed_5b = FIDInceptionA(192, pool_features=32)
     inception.Mixed_5c = FIDInceptionA(256, pool_features=64)
     inception.Mixed_5d = FIDInceptionA(288, pool_features=64)
@@ -174,7 +173,8 @@ def fid_inception_v3():
     inception.Mixed_7b = FIDInceptionE_1(1280)
     inception.Mixed_7c = FIDInceptionE_2(2048)
 
-    state_dict = load_state_dict_from_url(FID_WEIGHTS_URL, progress=True)
+    # state_dict = load_state_dict_from_url(FID_WEIGHTS_URL, progress=True)
+    state_dict = torch.load(FID_WEIGHTS_URL)
     inception.load_state_dict(state_dict)
     return inception
 
