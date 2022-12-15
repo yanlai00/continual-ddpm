@@ -71,7 +71,7 @@ class InceptionV3(nn.Module):
         if use_fid_inception:
             inception = fid_inception_v3()
         else:
-            inception = _inception_v3(pretrained=True)
+            inception = torchvision.models.inception_v3(pretrained=True)
 
         # Block 0: input to maxpool1
         block0 = [
@@ -153,23 +153,6 @@ class InceptionV3(nn.Module):
         return outp
 
 
-def _inception_v3(*args, **kwargs):
-    """Wraps `torchvision.models.inception_v3`
-    Skips default weight inititialization if supported by torchvision version.
-    See https://github.com/mseitzer/pytorch-fid/issues/28.
-    """
-    try:
-        version = tuple(map(int, torchvision.__version__.split('.')[:2]))
-    except ValueError:
-        # Just a caution against weird version strings
-        version = (0,)
-
-    if version >= (0, 6):
-        kwargs['init_weights'] = False
-
-    return torchvision.models.inception_v3(*args, **kwargs)
-
-
 def fid_inception_v3():
     """Build pretrained Inception model for FID computation
     The Inception model for FID computation uses a different set of weights
@@ -177,9 +160,10 @@ def fid_inception_v3():
     This method first constructs torchvision's Inception and then patches the
     necessary parts that are different in the FID Inception model.
     """
-    inception = _inception_v3(num_classes=1008,
+    inception = torchvision.models.inception_v3(num_classes=1008,
                               aux_logits=False,
-                              pretrained=False)
+                              pretrained=False,
+                              init_weights=False)
     inception.Mixed_5b = FIDInceptionA(192, pool_features=32)
     inception.Mixed_5c = FIDInceptionA(256, pool_features=64)
     inception.Mixed_5d = FIDInceptionA(288, pool_features=64)

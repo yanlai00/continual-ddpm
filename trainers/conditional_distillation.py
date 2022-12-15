@@ -11,7 +11,7 @@ from torch.utils.data import ConcatDataset
 import wandb
 from ewc import EWC
 import torch.nn.functional as F
-from trainers.trainer import Trainer, Gaussian2DTrainer, ClassConditionedGaussian2DTrainer, get_exp_path
+from trainers.trainer import Trainer, get_exp_path
 from trainers.continual_trainer import ContinualTrainer
 from trainers.continual_conditional_trainer import ContinualConditionalTrainer
 
@@ -26,12 +26,13 @@ class ConditionalDistillationTrainer(ContinualConditionalTrainer):
             self.step += 1
             # Move data to device
             data = data.to(self.device)
+            labels = labels.to(self.device)
             if self.diffusion.has_copy:
-                self.diffusion.generate_auxilary_data(data)
+                self.diffusion.generate_auxilary_data(data, self.experience_id)
             # Make the gradients zero
             self.optimizer.zero_grad()
             # Calculate loss
-            loss = self.diffusion.loss(data)
+            loss = self.diffusion.loss(data, labels)
             if self.diffusion.has_copy:
                 distillation_loss = self.diffusion.distillation_loss()
                 total_loss = loss + 5 * distillation_loss
@@ -55,18 +56,19 @@ class ConditionalDistillationTrainer(ContinualConditionalTrainer):
         for experience_id in range(self.n_experiences):
             self.dataset = self.datasets[experience_id]
             self.data_loader = torch.utils.data.DataLoader(self.dataset, self.batch_size, shuffle=True, pin_memory=True)
+            self.experience_id = experience_id
             if experience_id > 0:
                 self.diffusion.save_model_copy()
 
             if experience_id == 0:
-                epochs = 100
+                epochs = 1
             else:
                 epochs = self.epochs
             
             for epoch in range(epochs):
                 # Sample some images
                 if epoch == 0 or (epoch+1) % 20 == 0:
-                    for class_idx in range(self.num_classes):
+                    for class_idx in range(experience_id):
                         self.sample(class_idx, self.n_samples)
                         print(f"Finish Generating Class {class_idx}")
                 # Train the model
@@ -79,22 +81,3 @@ class ConditionalDistillationTrainer(ContinualConditionalTrainer):
             
             print(f"Finished Experience {experience_id}")
 
-    def sample(self, n_samples=100):
-        """
-        ### Sample images
-        """
-        with torch.no_grad():
-            # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
-            # Sample Initial Image (Random Gaussian Noise)
-            x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
-                            device=self.device)
-            # Remove noise for $T$ steps
-            for t_ in range(self.n_steps):
-                # $t$
-                t = self.n_steps - t_ - 1
-                # Sample from $p_\theta(x_{t-1}|x_t)$
-                t_vec = x.new_full((n_samples,), t, dtype=torch.long)
-                x = self.diffusion.p_sample(x, t_vec)
-            # Log samples
-            if self.wandb:
-                wandb.log({'samples': wandb.Image(x)}, step=self.step)

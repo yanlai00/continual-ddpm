@@ -14,6 +14,7 @@ class ClassConditionedUNet(UNet):
                  is_attn: Union[Tuple[bool, ...], List[int]] = (False, False, True, True),
                  n_blocks: int = 2, num_classes: int = 10):
         super().__init__(image_channels, n_channels, ch_mults, is_attn, n_blocks)
+        self.num_classes = num_classes
         self.class_emb = nn.Embedding(num_classes, n_channels * 4)
 
     def forward(self, x: torch.Tensor, t: torch.Tensor, class_idx: torch.Tensor):

@@ -11,7 +11,7 @@ from torch.utils.data import ConcatDataset
 import wandb
 from ewc import EWC
 import torch.nn.functional as F
-from trainers.trainer import Trainer, Gaussian2DTrainer, ClassConditionedGaussian2DTrainer, get_exp_path
+from trainers.trainer import Trainer, get_exp_path
 from trainers.continual_trainer import ContinualTrainer
 from trainers.continual_conditional_trainer import ContinualConditionalTrainer
 

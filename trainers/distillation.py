@@ -11,7 +11,7 @@ from torch.utils.data import ConcatDataset
 import wandb
 from ewc import EWC
 import torch.nn.functional as F
-from trainers.trainer import Trainer, Gaussian2DTrainer, ClassConditionedGaussian2DTrainer, get_exp_path
+from trainers.trainer import Trainer, get_exp_path
 from trainers.continual_trainer import ContinualTrainer
 from trainers.continual_conditional_trainer import ContinualConditionalTrainer
 
@@ -77,22 +77,3 @@ class DistillationTrainer(ContinualTrainer):
             
             print(f"Finished Experience {experience_id}")
 
-    def sample(self, n_samples=100):
-        """
-        ### Sample images
-        """
-        with torch.no_grad():
-            # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
-            # Sample Initial Image (Random Gaussian Noise)
-            x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
-                            device=self.device)
-            # Remove noise for $T$ steps
-            for t_ in range(self.n_steps):
-                # $t$
-                t = self.n_steps - t_ - 1
-                # Sample from $p_\theta(x_{t-1}|x_t)$
-                t_vec = x.new_full((n_samples,), t, dtype=torch.long)
-                x = self.diffusion.p_sample(x, t_vec)
-            # Log samples
-            if self.wandb:
-                wandb.log({'samples': wandb.Image(x)}, step=self.step)

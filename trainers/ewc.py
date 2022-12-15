@@ -11,25 +11,33 @@ from torch.utils.data import ConcatDataset
 import wandb
 from ewc import EWC
 import torch.nn.functional as F
-from trainers.trainer import Trainer, Gaussian2DTrainer, ClassConditionedGaussian2DTrainer, get_exp_path
+from trainers.trainer import Trainer, get_exp_path
 from trainers.continual_trainer import ContinualTrainer
 from trainers.continual_conditional_trainer import ContinualConditionalTrainer
 
-class EWCGaussian2DTrainer(ContinualTrainer):
+class EWCTrainer(ContinualTrainer):
     importance: int = 1000
     samples_per_task: int = 200
+    old_data_batch_size: int = 20
 
     def run(self):
-        self.old_tasks_data = []
+        self.old_tasks_dataset = None
         self.ewc = None
         for experience_id in range(self.n_experiences):
             self.dataset = self.datasets[experience_id]
             self.data_loader = torch.utils.data.DataLoader(self.dataset, self.batch_size, shuffle=True, pin_memory=True)
-            if self.old_tasks_data:
-                self.ewc = EWC(self.eps_model, self.diffusion, self.old_tasks_data, self.importance)
-            for epoch in range(self.epochs):
+            if self.old_tasks_dataset:
+                old_data_loader = torch.utils.data.DataLoader(self.old_tasks_dataset, self.old_data_batch_size, pin_memory=True)
+                self.ewc = EWC(self.eps_model, self.diffusion, old_data_loader, self.importance)
+
+            if experience_id == 0:
+                epochs = 1
+            else:
+                epochs = self.epochs
+            
+            for epoch in range(epochs):
                 # Sample some images
-                if epoch == 0 or (epoch+1) % 20 == 0:
+                if (epoch+1) % 20 == 0:
                     self.sample(self.n_samples)
                 # Train the model
                 self.train()
@@ -41,7 +49,11 @@ class EWCGaussian2DTrainer(ContinualTrainer):
             print(f"Finished Experience {experience_id}")
 
             # TODO: Edit this with subset and concat dataset 
-            self.old_tasks_data += list(self.dataset.get_sample(self.samples_per_task))
+            prev_task_dataset = torch.utils.data.Subset(self.dataset, list(range(self.samples_per_task)))
+            if self.old_tasks_dataset:
+                self.old_tasks_dataset = torch.utils.data.ConcatDataset([self.old_tasks_dataset, prev_task_dataset])
+            else:
+                self.old_tasks_dataset = prev_task_dataset
 
     def train(self):
         # Iterate through the dataset

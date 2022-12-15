@@ -72,3 +72,15 @@ class ClassConditionedDenoiseDiffusion(DenoiseDiffusion):
 
         # MSE loss
         return F.mse_loss(noise, eps_theta)
+
+    def generate_auxilary_data(self, x0: torch.Tensor, experience_id: int):
+        with torch.no_grad():
+            batch_size, image_size = x0.shape[0], x0.shape[1:]
+            self.aux_t = torch.randint(0, self.n_steps, (batch_size,), device=x0.device, dtype=torch.long)
+            self.aux_label = torch.randint(0, experience_id, (batch_size,), device=x0.device, dtype=torch.long)
+            self.aux_data = torch.randn((batch_size, *image_size), dtype=x0.dtype, device=x0.device) # TODO: Other methods of generating auxilary data
+            self.aux_noise = self.eps_model_copy(self.aux_data, self.aux_t, self.aux_label)
+
+    def distillation_loss(self):
+        eps_theta = self.eps_model(self.aux_data, self.aux_t, self.aux_label)
+        return F.l1_loss(self.aux_noise, eps_theta)

@@ -3,3 +3,5 @@ checkpoints/
 __pycache__/
 .ipynb_checkpoints/
 test_runs/
+images/
+classifiers/
