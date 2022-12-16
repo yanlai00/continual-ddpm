@@ -13,7 +13,6 @@ path1 = '/home/yy2694/continual-ddpm/images/cifar_uncond_kd'
 # dataset1 = None
 # dataset2 = MNIST(image_size)
 dataset2 = CIFAR10Test(image_size)
-# dataset2 = SplitCIFAR10(image_size, target=0)
 
 block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[dims]
 model = InceptionV3([block_idx]).to(device)
@@ -46,7 +45,3 @@ with open('/home/yy2694/continual-ddpm/cifar_mu.npz', 'wb') as f:
     np.save(f, m2)
 with open('/home/yy2694/continual-ddpm/cifar_sigma.npz', 'wb') as f:
     np.save(f, s2)
-
-# path = pathlib.Path(path)
-# files = sorted([file for ext in IMAGE_EXTENSIONS for file in path.glob('*.{}'.format(ext))])
-# dataset = ImagePathDataset(files, transforms=transforms.ToTensor())
