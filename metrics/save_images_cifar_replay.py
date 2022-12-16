@@ -5,19 +5,19 @@ import argparse
 from torchvision.utils import save_image
 import os
 
-save_dir = '/home/yy2694/continual-ddpm/images/mnist_uncond_sep/9'
+save_dir = '/home/yy2694/continual-ddpm/images/cifar_uncond_gen_replay'
 os.mkdir(save_dir)
 
 trainer = Trainer()
 
-trainer.batch_size = 500
-trainer.image_channels = 1
+trainer.batch_size = 1000
+trainer.image_channels = 3
 trainer.n_samples = 128
-trainer.dataset = MNIST(trainer.image_size)
+trainer.dataset = CIFAR10(trainer.image_size)
 
 trainer.init()
 # trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12022022_144833/checkpoint_99.pt'))
-trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12132022_093228mnist_9/checkpoint_100.pt'))
+trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12142022_022848cifar_uncond_gen_replay/checkpoint_1800.pt'))
 
 num_iterations = 1
 
