@@ -5,7 +5,7 @@ import argparse
 from torchvision.utils import save_image
 import os
 
-save_dir = '/home/yy2694/continual-ddpm/images/cifar_uncond_joint'
+save_dir = '/home/yy2694/continual-ddpm/images/cifar_uncond_kd'
 os.mkdir(save_dir)
 
 trainer = Trainer()
@@ -17,7 +17,7 @@ trainer.dataset = CIFAR10(trainer.image_size)
 
 trainer.init()
 # trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12022022_144833/checkpoint_99.pt'))
-trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12062022_125546/checkpoint_1000.pt'))
+trainer.eps_model.load_state_dict(torch.load('/home/yy2694/continual-ddpm/checkpoints/12122022_153230cifar_uncond_kd/checkpoint_4860.pt'))
 
 num_iterations = 1
 
