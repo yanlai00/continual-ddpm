@@ -127,6 +127,22 @@ class CIFAR10(torchvision.datasets.CIFAR10):
     def __getitem__(self, item):
         return super().__getitem__(item)
 
+class CIFAR10Test(torchvision.datasets.CIFAR10):
+    """
+    ### CIFAR10 dataset
+    """
+
+    def __init__(self, image_size):
+        transform = torchvision.transforms.Compose([
+            torchvision.transforms.Resize(image_size),
+            torchvision.transforms.ToTensor(),
+        ])
+
+        super().__init__(str(get_data_path()), train=False, download=False, transform=transform)
+
+    def __getitem__(self, item):
+        return super().__getitem__(item)
+
 class SplitCIFAR10(torchvision.datasets.CIFAR10):
     """
     ### CIFAR10 dataset
