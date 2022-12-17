@@ -1,6 +1,6 @@
 # Continual Learning for Diffusion Models
 
-This is a PyTorch implementation of different continual learning strategies for class-incremental image generation with [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239) (DDPM).
+This is a PyTorch implementation of different continual learning strategies for class-incremental image generation with [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239) (DDPM). Part of the repository is adopted from [the labml DDPM implementation](https://github.com/labmlai/annotated_deep_learning_paper_implementations/tree/master/labml_nn/diffusion/ddpm) and [the official SupSup code repository](https://github.com/RAIVNLab/supsup).
 
 ## Requirements
 ```
