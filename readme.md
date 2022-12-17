@@ -14,7 +14,7 @@ scipy
 ## Running Continual Learning Experiments
 
 ### Train DDPM Models
-The experiment config files can be found in the `experiments/` folder.  
+The experiment config files can be found in the `experiments/` folder. Here are some examples:  
   
 Unconditional image generation on MNIST with knowledge distillation:
 ```
