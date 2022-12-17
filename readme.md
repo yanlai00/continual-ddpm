@@ -26,7 +26,7 @@ python -m experiments.cond.mnist.sft
 ```
 Unconditional image generation on CIFAR with joint training:
 ```
-python -m experiments.cond.cifar.joint
+python -m experiments.uncond.cifar.joint
 ```
 
 ### Generate Images from Checkpoint
